@@ -47,3 +47,7 @@
   - The GA_Opioid_Report includes the data set structure, Table1 summarizing the characteristics of variables, maps of each variable, histograms of the covariates of interest, and the results of fitting a Poisson regression model.
   
   - For the maps in the report, I just wrote the code in .rmd files because they required the tmap package and could not be saved as .png flies.
+  
+## To Synchronize the package repository 
+  - My final project directory includes a lock file and renv folder that captures information on the packages used to create the report.
+  - Run `make install` command in your terminal to restore the package environment for my project.

@@ -419,7 +419,7 @@ kable(dat %>% arrange(desc(dist_to_treatment)) %>%
   * Counties in southwestern and rural central Georgia generally have longer distances to treatment centers.
 
 
-# Check the Distribution of Covariates
+# Examine the Distribution of Covariates
 
 ### pct_poverty
 ```{r, hist-pct-poverty}
@@ -486,7 +486,7 @@ $$
 y_i|\mu_i \sim \text{Poisson}(\mu_i), \\ where \  \mu_i = E(y_i) = Var(y_i)
 \\\
 \\
-log(\frac{\mu_i}{pop_i}) = \beta_0 + \beta_1\,poverty\_rate_i + \beta_2\,vacancy\_rate_i + \beta_3\,unemployment\_rate_i + \beta_4\,pct\_black_i + \beta_5\,dist\_to\_road_i + \beta_6\,dist\_to\_treatment_i + \theta_i
+log\left(\frac{\mu_i}{pop_i}\right) = \beta_0 + \beta_1\,poverty\_rate_i + \beta_2\,vacancy\_rate_i + \beta_3\,unemployment\_rate_i + \beta_4\,pct\_black_i + \beta_5\,dist\_to\_road_i + \beta_6\,dist\_to\_treatment_i + \theta_i
 \\\
 \\
 log(\mu_i) = log\,pop_i + \beta_0 + \beta_1\,poverty\_rate_i + \beta_2\,vacancy\_rate_i + \beta_3\,unemployment\_rate_i + \beta_4\,pct\_black_i + \beta_5\,dist\_to\_road_i + \beta_6\,dist\_to\_treatment_i + \theta_i

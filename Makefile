@@ -41,3 +41,7 @@ histogram: output/hist_poverty.png \
 clean:
 	rm -f output/*.png && rm -f output/*.rds && \
 	rm -f GA_Opioid_Report.html
+
+.PHONY:	install
+install:
+	Rscript -e "renv::restore(prompt = FALSE)"

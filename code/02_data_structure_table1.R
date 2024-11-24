@@ -10,6 +10,7 @@ library(tidyverse)
 library(sf)
 library(labelled)
 library(gtsummary)
+library(cardx)
 
 ## Data Structure and Summary Table
 # Categorize Mortality rate
