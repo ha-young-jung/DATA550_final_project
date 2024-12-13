@@ -2,27 +2,21 @@ here::i_am(
   "code/01_data_preprocessing.R"
 )
 
-library(tidyverse)
-library(sf)
+library(dplyr)
 
-# Import Data
-load(here::here("raw_data", "GeorgiaMapData.RData"))
+# Import data
+dat <- readRDS(here::here("raw_data", "ga_opioid_data.rds"))
 
-ga_clean <- ga_map_data %>% 
-  select(-c(DP03_0119PE, DP04_0003PE, DP03_0009PE, DP05_0065PE, Name.y, Name_Seat.y)) %>% # select variables
-  rename(Name = Name.x ,
-         Name_Seat = Name_Seat.x) %>%
-  mutate(mort_rate = incidence*1000) %>%
-  relocate(mort_rate, .after = incidence) %>%
-  relocate(unemployment_rate_out, .after = unemployment_rate) %>%
-  relocate(dist_to_usroad, dist_to_treatment, .after = pct_black) %>%
-  relocate(pct_black_std, .after = unemployment_rate_out_std)
+# Categorize mortality rate
+dat$mort_rate <- ifelse(dat$mort_rate < 0.1, 'Low',
+                        ifelse(dat$mort_rate < 0.2, 'Moderate', 'High'))
+dat$mort_rate <- factor(dat$mort_rate, levels = c("Low", "Moderate", "High"))
 
-# Replace Missing Values for Name and Name_Seat
-dat[51, 19:20] <- "Appling"
-dat[157, 19:20] <- "Statenville"
+# Factorize Rural-Urban Continuum Code (rucc_code13_5)
+dat$rucc_code13_5 <- factor(dat$rucc_code13_5, levels = c("lcm_lfm", "mm", "sm", "mi_non"),
+                            labels = c("Large Central Metro & Large Fringe Metro", "Medium Metro", "Small Metro", "Micropolitan & Non-Metro"))
 
-# save it to another file
+# Save it to another file
 saveRDS(
   dat,
   file = here::here("data", "dat.rds")

@@ -11,7 +11,6 @@ opts_chunk$set(
 )
 ```
 
-## Import Libraries and Data
 ```{r, here-i-am, include = FALSE}
 here::i_am("GA_Opioid_Report.Rmd")
 ```
@@ -23,7 +22,6 @@ dat <- readRDS(
 )
 ```
 
-
 ```{r, import-data, include = FALSE}
 # Import Libraries
 library(tidyverse)
@@ -31,12 +29,10 @@ library(ggplot2)
 library(tmap)
 library(sf)
 library(lme4)
-
-road_inter <- st_read(here::here("raw_data", "tl_2020_us_primaryroads.shp"), quiet = T)
-
-trt_ctrs <- read.csv(here::here("raw_data", "FindTreament_Facility_listing.csv"), header = T)
-trt_ctrs_sf <- st_as_sf(trt_ctrs, coords = c("longitude", "latitude"), crs = 4326)
 ```
+
+## Introduction
+ **The data set is about the number of opioid overdose deaths and population in each county in Georgia in 2020. The goal of this study is to examine county-level measures of social vulnerability and access to health care in relation to observed overdose mortality rates. Specifically, we aim to identify county-level factors associated with opioid mortality in Georgia, focusing on measures of social vulnerability such as poverty, unemployment, housing vacancy, urbanization, and access to health care and treatment.**
 
 ## Data Structure and Summary Table
 ```{r}
@@ -58,7 +54,7 @@ table_one
 ## Exploratory Data Analysis
 ### 1. NAME
 #### **Name of the county**
-```{r}
+```{r, NAME}
 #| fig.align = "center"
 dat %>%
   tm_shape() +
@@ -73,39 +69,17 @@ dat %>%
 
   * There are 159 counties in Georgia.
 
-### 2 & 3. FIPS code / Code
-#### **FIPS code**
-```{r}
-#| fig.align = "center"
-dat %>%
-  tm_shape() +
-  tm_polygons() +
-  tm_text(text = "FIPS",
-          size = 0.35) +
-  tm_layout(title = "County \n FIPS code",
-            title.size = 1,
-            title.position = c(.7, .9),
-            frame = FALSE)
-```
-
-  * All FIPS codes begin with '13', which represents Georgia's state code, followed by the specific county codes.
-
-### 4 & 5. rucc_code13 / rucc_code13_n
+### 2. rucc_code13 / rucc_code13_n
 #### **Rural-urban continuum code of the County**
-```{r}
+```{r, rucc_code bar-plot}
 #| fig.align = "center",
 #| out.width = "500px"
-ggplot(dat, aes(x = fct_infreq(rucc_code13), fill = rucc_code13)) +
-  geom_bar() +
-  scale_fill_brewer(palette = "Greens", direction = -1) +
-  geom_text(stat='count', aes(label = after_stat(count)), vjust = -0.3) +
-  scale_x_discrete(labels = c("Non-Metro", "Small Metro", "Large Fringe Metro", "Micropolitan", "Medium Metro", "Large Central Metro"), name = "Rural-Urban Continuum Code") +
-  theme(axis.text.x = element_text(angle = 35, hjust = 1)) +
-  theme(legend.position = "none")
+knitr::include_graphics(
+  here::here("output/bar_rucc.png")
+)
 ```
 
-
-```{r}
+```{r, rucc_code}
 #| fig.align = "center"
 dat %>%
   tm_shape() +
@@ -122,9 +96,9 @@ dat %>%
   * Most counties in Georgia are non-metro, followed by small metro, large fringe metro, micropolitan, and medium metro areas. <br> Only **Fulton** county is classified as a large central metro.
   * Most major metro areas, including large central metro, large fringe metro, and medium metro areas, are concentrated in the northern part of the state, particularly around Atlanta.
 
-### 6 & 7. mortality / population
+### 3 & 4. mortality / population
 #### **The number of opioid-related deaths and population in each county**
-```{r}
+```{r, mortality & population}
 #| fig.align = "center"
 # mortality count
 p1 <- dat %>%
@@ -155,27 +129,12 @@ p2 <- dat %>%
 tmap_arrange(p1, p2, nrow=1)
 ```
 
-```{r, echo = FALSE}
-#| fig.align = "center"
-# Top 5 Counties with the Highest Mortality Count
-kable(dat %>% arrange(desc(mortality)) %>% 
-        select(NAME, mortality) %>% 
-        st_drop_geometry() %>% 
-        head(5))
-
-# Top 5 Counties with the Highest Population
-kable(dat %>% arrange(desc(population)) %>% 
-        select(NAME, population) %>% 
-        st_drop_geometry() %>% 
-        head(5))
-```
-
   * Mortality counts are concentrated in urban areas, meaning higher counts are typically found in areas with large populations, such as Fulton, Gwinnett, Cobb, and Dekalb counties.
   * In southern Georgia, **Tift** County stands out with a relatively high count (**31**), suggesting a higher expected mortality rate.
 
-### 8. mort_rate
+### 5. mort_rate
 #### **Mortality rate = mortality count/population in each county**
-```{r}
+```{r, mort_rate}
 #| fig.align = "center"
 # incidence
 tm_shape(dat) +
@@ -184,24 +143,8 @@ tm_shape(dat) +
               style = "cont",
               pal = "Greens",
               legend.reverse = TRUE) +
-  tm_shape(filter(dat, incidence > 0.00035)) +
-  tm_text("NAME", 
-          size = 0.6,
-          col = "gray90") +
-  tm_shape(road_inter) +
-  tm_lines(col="orange", lwd = 1, alpha = 0.6) +
   tm_layout(frame = FALSE,
             legend.title.size = 1)
-```
-
-  * U.S. Census Bureau, "tl_2020_13_prisecroads", TIGER/Line Shapefiles, 2020, https://www.census.gov/cgi-bin/geo/shapefiles/index.php?year=2020&layergroup=Roads, accessed on October 2, 2024.
-
-```{r, echo = FALSE}
-# Top 5 Counties with the Highest Mortality Rate
-kable(dat %>% arrange(desc(incidence)) %>% 
-        select(NAME, incidence) %>% 
-        st_drop_geometry() %>% 
-        head(5))
 ```
 
   * Located in southern and central Georgia, **Turner** County has the highest mortality rate at 0.001, followed by Tift (0.0008), Randolph (0.0006), Telfair (0.0006), and Wilkinson (0.0006) counties, which are also in the southern part of the st 
@@ -209,9 +152,9 @@ kable(dat %>% arrange(desc(incidence)) %>%
   
 ##### The following are summary of the geographic distribution of the covariates that we are interested in.
 
-### 9. pct_poverty
+### 6. pct_poverty
 #### **Percentage of people whose income in the past 12 months is below the poverty level in each county**
-```{r}
+```{r, pct_poverty}
 #| fig.align = "center"
 # pct_poverty
 dat %>%
@@ -227,20 +170,12 @@ dat %>%
             legend.title.size = 1)
 ```
 
-```{r, echo = FALSE}
-# Top 5 Counties with the Highest Poverty Rate
-kable(dat %>% arrange(desc(pct_poverty)) %>%
-        select(NAME, pct_poverty) %>%
-        st_drop_geometry() %>%
-        head(5))
-```
-
   * **Taylor** County has the highest poverty rate at 28.6%, followed by Taliaferro (28.5%), Terrell (28.0%), Jenkins (27.5%), and Seminole (27.1%) counties.
   * Overall, counties in southern and central Georgia tend to have relatively higher poverty rates compared to those in northern Georgia.
 
-### 10. vacancy_rate
+### 7. vacancy_rate
 #### **Percentage of housing vacancy in each county**
-```{r}
+```{r, vacancy_rate}
 #| fig.align = "center"
 # vacancy_rate
 dat %>%
@@ -256,37 +191,21 @@ dat %>%
             legend.title.size = 1)
 ```
 
-```{r, echo = FALSE}
-# Top 5 Counties with the Highest Housing Vacancy Rate
-kable(dat %>% arrange(desc(vacancy_rate)) %>% 
-        select(NAME, vacancy_rate) %>% 
-        st_drop_geometry() %>% 
-        head(5))
-```
-
   * **Quitman** County has the highest vacancy rate at 53.2%, followed by Rabun (44.6%), Hancock (43.3%), Towns (39.6%), and Clay (39.2%) counties.
   * Vacancy rates vary widely across the state, with high rates observed in northern, central-eastern, and southern Georgia.
 
-### 11 & 12. unemployment_rate / _out
+### 8. unemployment_rate / _out
 #### **Unemployment rate (before / after treating outliers) in each county**
-```{r}
+```{r, unemployment_rate histogram}
 #| fig.align = "center",
 #| out.width = "500px"
-# unemployment_rate
 # histogram
-outlier <- dat %>%
-  filter(unemployment_rate > 20)
-
-ggplot(dat, aes(x = unemployment_rate)) +
-  geom_histogram() +
-  geom_histogram(data = outlier,
-                 aes(x = unemployment_rate),
-                 fill = 'red') +
-  annotate("text", x=21.5, y=1.5, label= "Quitman", size=3.5) +
-  ylab("count")
+knitr::include_graphics(
+  here::here("output/hist_unemp.png")
+)
 ```
 
-```{r}
+```{r, unemployment_rate}
 #| fig.align = "center"
 dat %>%
   tm_shape() +
@@ -303,7 +222,7 @@ dat %>%
 
   * **Quitman** county has a notably high unemployment rate of **21.4%**, making it an outlier among other counties. To address this outlier, we replaced any values above the 99th percentile with the 99th percentile of the ranked value.
 
-```{r, echo = FALSE}
+```{r, unemployment_rate_out, echo = FALSE}
 #| fig.align = "center"
 # unemployment_rate_out
 dat %>%
@@ -319,20 +238,12 @@ dat %>%
             legend.title.size = 1)
 ```
 
-```{r, echo = FALSE}
-# Top 5 Counties with the Highest Unemployment Rate - after replacing outliers
-kable(dat %>% arrange(desc(unemployment_rate_out)) %>% 
-        select(NAME, unemployment_rate_out) %>% 
-        st_drop_geometry() %>% 
-        head(5))
-```
-
   * After adjusting for outliers, **Quitman** and **Baker** counties have the highest unemployment rate at 13.83%, followed by Charlton (13.7%), Long (12.4%), and Crisp (12%) counties.
   * Overall, counties in southern and rural Georgia tend to have higher unemployment rates compared to those in northern Georgia.
 
-### 13. pct_black
+### 9. pct_black
 #### **Percentage of county population that is made up of Black people**
-```{r}
+```{r, pct_black}
 #| fig.align = "center"
 # pct_black
 dat %>%
@@ -347,20 +258,12 @@ dat %>%
   tm_layout(frame = FALSE)
 ```
 
-```{r, echo = FALSE}
-# Top 5 Counties with the Highest Percentage of Black Population
-kable(dat %>% arrange(desc(pct_black)) %>% 
-        select(NAME, pct_black) %>% 
-        st_drop_geometry() %>% 
-        head(5))
-```
-
   * **Hancock** County has the largest percentage of Black population at 72.7%, followed by Clayton (72.5%), Dougherty (71.2%), Randolph (64.4%), and Macon (62.6%) counties.
   * In general, counties with higher percentages of Black populations are more common in central and southwestern Georgia.
 
-### 14. dist_to_usroad
+### 10. dist_to_usroad
 #### **Distance from County Seat to Interstate**
-```{r}
+```{r, dist_to_usroad}
 #| fig.align = "center"
 # dist_to_usroad
 tm_shape(dat) +
@@ -368,28 +271,17 @@ tm_shape(dat) +
               title = "Distance to Interstate",
               style = "cont",
               pal = "Greens",
-              legend.reverse = TRUE) +
-  tm_shape(filter(dat, is.na(dist_to_usroad) == TRUE)) +
-  tm_text("NAME", size = 0.7) +
-  tm_shape(road_inter) +
-  tm_lines(col="red", lwd = 1, alpha = 0.6) +
-  tm_layout(frame = FALSE)
-```
-
-```{r, echo = FALSE}
-# Top 5 Counties with the Closest Distance from County Seat to Interstate
-kable(dat %>% arrange(desc(dist_to_usroad)) %>% 
-        select(NAME, dist_to_usroad) %>% 
-        st_drop_geometry() %>% 
-        head(5))
+              legend.reverse = TRUE) + 
+  tm_layout(frame = FALSE,
+            legend.title.size = 1)
 ```
 
   * **Seminole** County has the longest distance from the county seat to the interstate at 446,752 feet, followed by Miller (338,135 feet), Early (371,695 feet), Decatur (364,239 feet), and Bacon (313,542 feet) counties.
   * Counties in southwestern and southeastern Georgia tend to have longer distances to interstates, particularly in more rural areas.
 
-### 15. dist_to_treatment
+### 11. dist_to_treatment
 #### **Distance to Treatment Centers**
-```{r}
+```{r, dist_to_treatment}
 #| fig.align = "center"
 # dist_to_treatment
 tm_shape(dat) +
@@ -397,88 +289,15 @@ tm_shape(dat) +
               title = "Distance to Treatment Centers",
               style = "cont",
               pal = "Greens",
-              legend.reverse = TRUE) +
-  tm_shape(filter(dat, is.na(dist_to_treatment) == TRUE)) +
-  tm_text("NAME", size = 0.7) +
-  tm_shape(trt_ctrs_sf) + 
-  tm_dots(col= 'red', size=0.1) +
-  tm_layout(frame = FALSE)
+              legend.reverse = TRUE) + 
+  tm_layout(frame = FALSE,
+            legend.title.size = 1)
 ```
 
   * U.S. Department of Health and Human Services, Substance Abuse and Mental Health Services Administration, Behavioral Health Services Information System. (2024). FindTreament_Facility_listing. Retrieved from https://findtreatment.gov/locator. 
 
-```{r, echo = FALSE}
-# Top 5 Counties with the Closest Distance to Treatment Centers
-kable(dat %>% arrange(desc(dist_to_treatment)) %>% 
-        select(NAME, dist_to_treatment) %>% 
-        st_drop_geometry() %>% 
-        head(5))
-```
-
   * **Quitman** County has the longest distance to treatment centers at 185,132 feet, followed by Warren (164,830 feet), Stewart (161,331 feet), Glascock (160,496 feet), and Randolph (153,437 feet) counties.
   * Counties in southwestern and rural central Georgia generally have longer distances to treatment centers.
-
-
-# Examine the Distribution of Covariates
-
-### pct_poverty
-```{r, hist-pct-poverty}
-#| fig.align = "center",
-#| out.width = "600px"
-knitr::include_graphics(
-  here::here("output/hist_poverty.png")
-)
-```
-
-### vacancy_rate
-```{r, hist-vacancy-rate}
-#| fig.align = "center",
-#| out.width = "600px"
-knitr::include_graphics(
-  here::here("output/hist_vacancy.png")
-)
-```
-
-### unemployment_rate_out
-```{r, hist-unemployment-rate-out}
-#| fig.align = "center",
-#| out.width = "600px"
-knitr::include_graphics(
-  here::here("output/hist_unemp.png")
-)
-```
-
-### pct_black
-```{r, hist-pct-black}
-#| fig.align = "center",
-#| out.width = "600px"
-knitr::include_graphics(
-  here::here("output/hist_black.png")
-)
-```
-
-### dist_to_usroad
-```{r, hist-dist-to-usroad}
-#| fig.align = "center",
-#| out.width = "600px"
-knitr::include_graphics(
-  here::here("output/hist_road.png")
-)
-```
-
-### dist_to_treatment
-```{r, hist-dist-to-treatment}
-#| fig.align = "center",
-#| out.width = "600px"
-knitr::include_graphics(
-  here::here("output/hist_trt.png")
-)
-```
-
-```{r, echo = FALSE}
-# Import Data
-dat <- readRDS(here::here("raw_data", "ga_clean.rds"))
-```
 
 ## Poisson Random Intercept Model with a Population Offset
 <br>
@@ -486,10 +305,10 @@ $$
 y_i|\mu_i \sim \text{Poisson}(\mu_i), \\ where \  \mu_i = E(y_i) = Var(y_i)
 \\\
 \\
-log\left(\frac{\mu_i}{pop_i}\right) = \beta_0 + \beta_1\,poverty\_rate_i + \beta_2\,vacancy\_rate_i + \beta_3\,unemployment\_rate_i + \beta_4\,pct\_black_i + \beta_5\,dist\_to\_road_i + \beta_6\,dist\_to\_treatment_i + \theta_i
+\log\left(\frac{\mu_i}{pop_i}\right) = \beta_0 + \beta_1\,poverty\_rate_i + \beta_2\,vacancy\_rate_i + \beta_3\,unemployment\_rate_i + \beta_4\,pct\_black_i + \beta_5\,dist\_to\_road_i + \beta_6\,dist\_to\_treatment_i + \theta_i
 \\\
 \\
-log(\mu_i) = log\,pop_i + \beta_0 + \beta_1\,poverty\_rate_i + \beta_2\,vacancy\_rate_i + \beta_3\,unemployment\_rate_i + \beta_4\,pct\_black_i + \beta_5\,dist\_to\_road_i + \beta_6\,dist\_to\_treatment_i + \theta_i
+\log(\mu_i) = \log(pop_i) + \beta_0 + \beta_1\,poverty\_rate_i + \beta_2\,vacancy\_rate_i + \beta_3\,unemployment\_rate_i + \beta_4\,pct\_black_i + \beta_5\,dist\_to\_road_i + \beta_6\,dist\_to\_treatment_i + \theta_i
 \\\
 \\
 \theta_i \sim N(0,\tau^2)
@@ -498,7 +317,7 @@ $$
   * \(y_i\) : mortality count for county i
   * \(\mu_i\) : expected mortality count for county i  
   
-  * \(log\,pop_i\) : population of county i, used as an offset to adjust for the different population sizes across the counties  
+  * \(\log pop_i\) : population of county i, used as an offset to adjust for the different population sizes across the counties  
   
   * \(\beta_0\) : baseline log expected mortality rate
   * \(\theta_i\) : random intercept for county i, county-specific deviation in baseline log expected mortality rate
@@ -509,8 +328,8 @@ $$
   * \(e^{\beta_5}\) : relative mortality rate change for a one standard deviation increase in the distance to the interstate
   * \(e^{\beta_6}\) : relative mortality rate change for a one standard deviation increase in the distance to the treatment center
 
-## Fit the Model
-```{r, echo = TRUE}
+### Fit the Model
+```{r, poisson regression, echo = TRUE}
 # Fit the poisson regression model
 dat$log_pop = log(dat$population)
 fit = glmer(mortality ~ offset(log_pop) + pct_poverty_std + vacancy_rate_std +
@@ -525,4 +344,3 @@ summary(fit)
 
   * There is evidence that mortality rate **increases** by approximately **17.4%** (\(e^\hat{\beta_2}\) = \(e^{0.16}\) = 1.174) for a one standard deviation **increase** in the **vacancy rate**.  
   * There is evidence that mortality rate **decreases** by approximately **16.5%** (\(e^\hat{\beta_5}\) = \(e^{-0.180}\) = 0.835) for a one standard deviation **increase** in the **distance to the interstate**.  
-  
