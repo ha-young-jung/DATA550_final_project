@@ -1,3 +1,6 @@
+# Final Project: Opioid Overdose Mortality Data for Georgia (2020)
+The data set contains information on the number of opioid overdose deaths and the population of each county in Georgia in 2020. The goal of this study is to examine the relationship between county-level measures of social vulnerability, access to health care, and observed overdose mortality rates. The key variables of interest include: poverty rate, vacancy rate, unemployment rate, percentage of Black population, distance to interstates, and distance to treatment centers.
+
 ## Contents of the Repository
 
 `raw_data/`
@@ -52,7 +55,14 @@
 ## Synchronizing the package repository 
   - My final project directory includes a lock file and renv folder that captures information on the packages used to create the report.
   - Run `make install` command in your terminal to restore the package environment for my project.
-
+  
+## Building the Docker image
+  - Run `make final_project` to build the Docker image.
+  - This is a link to the image on DockerHub: https://hub.docker.com/repository/docker/hayoungjung/final_project/general
+  
 ## Generating the report
-  - Run `make` command in your terminal, and this will sequentially execute the R script files to build the report.
+  - Run `make report/GA_Opioid_Report.html` command in your terminal, and this will sequentially execute the R script files and generate the report.
   - If you want to ensure a clean build, run `make clean` command first. This removes any previously generated outputs from the R scripts, ensuring the process works correctly from start to finish.
+
+## Note
+  - The report can only be generated on a Mac or Linux OS.

@@ -1,3 +1,4 @@
+## Report associated rules (run within a docker container) ##
 # build the report
 GA_Opioid_Report.html: code/04_render_report.R \
   GA_Opioid_Report.Rmd table plots
@@ -29,3 +30,16 @@ clean:
 .PHONY:	install
 install:
 	Rscript -e "renv::restore(prompt = FALSE)"
+
+## Docker associated rules (run on our local machine) ##	
+# rule to build image
+PROJECTFILES = GA_Opioid_Report.Rmd code/02_data_structure_table1.R code/03_make_plots.R code/04_render_report.R Makefile
+RENVFILES = renv.lock renv/activate.R renv/settings.json
+
+final_project: Dockerfile $(PROJECTFILES) $(RENVFILES)
+	docker build -t hayoungjung/final_project .
+	touch $@ 
+
+# rule to build the report automatically in our container
+report/GA_Opioid_Report.html:
+	docker run -v "/$$(pwd)/report":/home/rstudio/project/report hayoungjung/final_project
