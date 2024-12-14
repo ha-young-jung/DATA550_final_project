@@ -18,6 +18,9 @@ The data set contains information on the number of opioid overdose deaths and th
 `output/`
 
   - includes the output files (table1 and plots)
+  
+`report/`
+  - includes the compiled report
 
 ## Code Description
 
